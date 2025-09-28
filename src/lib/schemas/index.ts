@@ -26,3 +26,20 @@ export const RegisterSchema = z.object({
 export const ResetSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
+
+
+
+export enum UserRole {
+  ADMIN = "ADMIN",
+  USER = "USER",
+}
+
+export const SettingsSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email"),
+  password: z.string().optional(),
+  newPassword: z.string().optional(),
+  role: z.nativeEnum(UserRole),
+  isTwoFactorEnabled: z.boolean(),
+});
+

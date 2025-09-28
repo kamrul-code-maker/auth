@@ -19,14 +19,13 @@ import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 
 import { Formik, Form, ErrorMessage } from "formik";
+import { SettingsSchema, UserRole } from "@/lib/schemas";
+import { SettingsSchemaType } from "@/lib/schemas/validations";
 
 // ---------------------
 // Mocked types & data
 // ---------------------
-export enum UserRole {
-  ADMIN = "ADMIN",
-  USER = "USER",
-}
+
 
 // Mock current user hook
 const useCurrentUser = () => ({
@@ -38,7 +37,7 @@ const useCurrentUser = () => ({
 });
 
 // Mock settings action
-const settings = async (values: any) =>
+const settings = async (values: SettingsSchemaType) =>
   new Promise<{ success?: string; error?: string }>((resolve) => {
     console.log("Submitted values:", values);
     setTimeout(() => resolve({ success: "Settings saved successfully!" }), 1000);
@@ -47,17 +46,9 @@ const settings = async (values: any) =>
 // ---------------------
 // Zod schema + Formik validate function
 // ---------------------
-const SettingsSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email"),
-  password: z.string().optional(),
-  newPassword: z.string().optional(),
-  role: z.nativeEnum(UserRole),
-  isTwoFactorEnabled: z.boolean(),
-});
 
 // Convert Zod schema to Formik validate function
-const validate = (values: any) => {
+const validate = (values: SettingsSchemaType) => {
   const result = SettingsSchema.safeParse(values);
   const errors: any = {};
   if (!result.success) {
