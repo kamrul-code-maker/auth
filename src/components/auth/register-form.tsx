@@ -1,6 +1,5 @@
 "use client";
 
-import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -21,6 +20,7 @@ import { FormSuccess } from "@/components/form-success";
 import { RegisterSchemaType } from "@/lib/schemas/validations";
 import { RegisterSchema } from "@/lib/schemas";
 import { registerDefaultValues } from "@/lib/schemas/defaultValues";
+import { register } from "@/lib/actions/register";
 
 
 export const RegisterForm = () => {
@@ -31,21 +31,14 @@ export const RegisterForm = () => {
     resolver: zodResolver(RegisterSchema),
     defaultValues: registerDefaultValues
   });
-
-  const onSubmit = (values: RegisterSchemaType) => {
+   const onSubmit = async (values: RegisterSchemaType) => {
     setError("");
     setSuccess("");
 
-    // ✅ Dummy register simulation
-    if (
-      values.name &&
-      values.email &&
-      values.password.length >= 6
-    ) {
-      setSuccess("Account created successfully! (dummy)");
-    } else {
-      setError("Please fill in all fields correctly (dummy)");
-    }
+    // ✅ Server action call
+    const res = await register(values); // Prisma logic runs server-side
+    if (res.success) setSuccess(res.success);
+    else setError(res.error);
   };
 
   return (
