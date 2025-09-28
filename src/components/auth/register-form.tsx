@@ -31,14 +31,17 @@ export const RegisterForm = () => {
     resolver: zodResolver(RegisterSchema),
     defaultValues: registerDefaultValues
   });
-   const onSubmit = async (values: RegisterSchemaType) => {
+  const onSubmit = async (values: RegisterSchemaType) => {
     setError("");
     setSuccess("");
 
     // ✅ Server action call
     const res = await register(values); // Prisma logic runs server-side
-    if (res.success) setSuccess(res.success);
-    else setError(res.error);
+    if (res.success) {
+      setSuccess(res.success);
+    } else {
+      setError(res.error)
+    }
   };
 
   return (
