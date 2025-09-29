@@ -1,10 +1,16 @@
+// middleware.ts
 
 
-import authConfig from "./auth.config";
-import NextAuth from "next-auth";
 import { apiAuthPrefix, authRoutes, DEFAULT_LOGIN_REDIRECT, publicRoutes } from "./routes";
+import { auth } from "./auth"   // শুধু auth import করো, পুরো config নয়
 
-const { auth } = NextAuth(authConfig)
+
+// import authConfig from "./auth.config";
+// import NextAuth from "next-auth";
+// const { auth } = NextAuth(authConfig)
+
+
+
 
 export default auth((req) => {
     const { nextUrl } = req;
@@ -13,8 +19,8 @@ export default auth((req) => {
     const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix)
     const isPublicRotue = publicRoutes.includes(nextUrl.pathname);
     const isAuthRoute = authRoutes.includes(nextUrl.pathname)
-   
-   
+
+
     if (isApiAuthRoute) {
         return null
     }
@@ -25,11 +31,6 @@ export default auth((req) => {
         }
         return null
     }
-
-
-    console.log("isAuthRoute:", isAuthRoute)
-    console.log("isLoggedIn:", isLoggedIn)
-    console.log("isPublicRotue:", isPublicRotue)
 
     if (!isLoggedIn && !isPublicRotue) {
         return Response.redirect(new URL("/auth/login", nextUrl))
