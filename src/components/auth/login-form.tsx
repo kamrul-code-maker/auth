@@ -22,14 +22,15 @@ import { loginSchema } from "@/lib/schemas";
 import { LoginSchemaType } from "@/lib/schemas/validations";
 import { loginDefaultValues } from "@/lib/schemas/defaultValues";
 import { login } from "@/lib/actions/login";
+import Link from "next/link";
 
 
 
 export const LoginForm = () => {
-  const searchParams = useSearchParams(); 
-  const  urlError = searchParams.get("error") === "OAuthAccountNotLinked" ? "Email already in use with different provider!":"";
+  const searchParams = useSearchParams();
+  const urlError = searchParams.get("error") === "OAuthAccountNotLinked" ? "Email already in use with different provider!" : "";
 
-  const router = useRouter(); 
+  const router = useRouter();
 
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
@@ -48,7 +49,7 @@ export const LoginForm = () => {
     if (res.success) {
       setSuccess(res.success);
       // 🚀 এখানে client-side redirect করবেন
-    router.push("/dashboard")
+      router.push("/dashboard")
     } else {
       setError(res.error)
     }
@@ -97,6 +98,14 @@ export const LoginForm = () => {
           </div>
           <FormError message={error || urlError} />
           <FormSuccess message={success} />
+          <Button
+            size="sm"
+            variant="link"
+            asChild
+            className="px-0 font-normal"
+          >
+            <Link href="/auth/reset">Forget Password?</Link>
+          </Button>
           <Button type="submit" className="w-full">
             Login
           </Button>

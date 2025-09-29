@@ -21,6 +21,7 @@ import { FormSuccess } from "@/components/form-success";
 import { ResetSchemaType } from "@/lib/schemas/validations";
 import { ResetSchema } from "@/lib/schemas";
 import { resetDefaultValues } from "@/lib/schemas/defaultValues";
+import { resetPassword } from "@/lib/actions/reset";
 
 
 export const ResetForm = () => {
@@ -32,15 +33,18 @@ export const ResetForm = () => {
     defaultValues: resetDefaultValues
   });
 
-  const onSubmit = (values: ResetSchemaType) => {
+  const onSubmit = async (values: ResetSchemaType) => {
     setError("");
     setSuccess("");
 
     // ✅ Dummy simulation
-    if (values.email.includes("@")) {
-      setSuccess("Reset email sent! (dummy)");
+
+    // ✅ Server action call
+    const res = await resetPassword(values); // Prisma logic runs server-side
+    if (res.success) {
+      setSuccess(res.success);
     } else {
-      setError("Please enter a valid email address (dummy)");
+      setError(res.error)
     }
   };
 
