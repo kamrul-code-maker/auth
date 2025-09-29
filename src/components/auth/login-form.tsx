@@ -12,6 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CardWrapper } from "@/components/auth/card-wrapper";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-error";
@@ -25,6 +26,11 @@ import { login } from "@/lib/actions/login";
 
 
 export const LoginForm = () => {
+  const searchParams = useSearchParams(); 
+  const  urlError = searchParams.get("error") === "OAuthAccountNotLinked" ? "Email already in use with different provider!":"";
+
+  const router = useRouter(); 
+
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
 
@@ -41,6 +47,8 @@ export const LoginForm = () => {
     const res = await login(values); // Prisma logic runs server-side
     if (res.success) {
       setSuccess(res.success);
+      // 🚀 এখানে client-side redirect করবেন
+    router.push("/dashboard")
     } else {
       setError(res.error)
     }
@@ -87,7 +95,7 @@ export const LoginForm = () => {
               )}
             />
           </div>
-          <FormError message={error} />
+          <FormError message={error || urlError} />
           <FormSuccess message={success} />
           <Button type="submit" className="w-full">
             Login

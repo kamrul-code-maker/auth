@@ -22,7 +22,7 @@ export const login = async (values: LoginSchemaType) => {
         await signIn("credentials", {
             email,
             password,
-            redirectTo: DEFAULT_LOGIN_REDIRECT
+            redirect: false, // 🚀 redirect বন্ধ করলাম
         })
         return { success: "Succefully Logged In " }
     } catch (error) {

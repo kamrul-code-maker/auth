@@ -9,20 +9,29 @@ import { UserRole } from "@prisma/client"
 export const {
     handlers: { GET, POST }, auth, signIn, signOut
 } = NextAuth({
+    pages:{
+        signIn:"/auth/login",
+        error:"/auth/error",
+    },
+    events: {
+        async linkAccount({ user }) {
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { emailVerified: new Date() }
+            })
+        }
+    },
     callbacks: {
-        async signIn({ user }) {
-            if (!user?.id) {
-                throw new Error("User ID is missing");
-            }
-            const existingUser = await getUserById(user.id);
-            if (!existingUser || !existingUser.emailVerified) {
-               throw new Error("Your email is not verified. Please verify your email to login.");
-            }
-
-            return true;
-
-
-        },
+        // async signIn({ user }) {
+        //     if (!user?.id) {
+        //         throw new Error("User ID is missing");
+        //     }
+        //     const existingUser = await getUserById(user.id);
+        //     if (!existingUser || !existingUser.emailVerified) {
+        //         throw new Error("Your email is not verified. Please verify your email to login.");
+        //     }
+        //     return true;
+        // },
         async session({ token, session }) {
 
             if (token.sub && session.user) {
