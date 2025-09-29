@@ -1,31 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { BeatLoader } from "react-spinners";
 
 import { CardWrapper } from "@/components/auth/card-wrapper";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
+import { useSearchParams } from "next/navigation";
+import { newVerification } from "@/lib/actions/new-verification";
 
 export const NewVerificationForm = () => {
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
 
-  // ✅ Dummy effect to simulate verification delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      // Randomly succeed or fail for dummy simulation
-      if (Math.random() > 0.3) {
-        setSuccess("Your email has been verified! (dummy)");
-      } else {
-        setError("Verification failed! (dummy)");
-      }
-      setLoading(false);
-    }, 1500);
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
 
-    return () => clearTimeout(timer);
-  }, []);
+  const onSubmit = useCallback(() => {
+    if (success || error) return;
+
+    if (!token) {
+      setError("Missing token!");
+      setLoading(false); // ✅ loader বন্ধ
+      return;
+    }
+
+    newVerification(token)
+      .then((data) => {
+        setSuccess(data.success);
+        setError(data.error);
+      })
+      .catch(() => {
+        setError("Something went wrong!");
+      })
+      .finally(() => {
+        setLoading(false); // ✅ শেষমেশ loading false
+      });
+  }, [token, success, error]);
+
+  useEffect(() => {
+    onSubmit();
+  }, [onSubmit]);
 
   return (
     <CardWrapper
@@ -35,8 +51,8 @@ export const NewVerificationForm = () => {
     >
       <div className="flex items-center w-full justify-center">
         {loading && <BeatLoader />}
-        <FormSuccess message={success} />
-        {!loading && !success && <FormError message={error} />}
+        {!loading && success && <FormSuccess message={success} />}
+        {!loading && !success && error && <FormError message={error} />}
       </div>
     </CardWrapper>
   );
