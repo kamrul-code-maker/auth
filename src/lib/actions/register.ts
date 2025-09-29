@@ -8,6 +8,8 @@ import { RegisterSchema } from "../schemas";
 import { RegisterSchemaType } from "../schemas/validations";
 import { getUserByEmail } from "@/data/user";
 import prisma from "../prisma";
+import { generateVerficationToken } from "../tokens";
+import { sendVerificationEmail } from "../email";
 
 
 export const register = async (values: RegisterSchemaType) => {
@@ -33,7 +35,14 @@ export const register = async (values: RegisterSchemaType) => {
         }
     })
 
+    // TODO: send verfication token email
 
+    const verficationToken = await generateVerficationToken(email);
+
+    await sendVerificationEmail(
+        verficationToken.email,
+        verficationToken.token,
+    );
 
     return { success: "Confirmation email sent!" };
 
