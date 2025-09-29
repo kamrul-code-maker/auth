@@ -1,3 +1,4 @@
+// register actions 
 
 
 "use server";
@@ -7,8 +8,6 @@ import { RegisterSchema } from "../schemas";
 import { RegisterSchemaType } from "../schemas/validations";
 import { getUserByEmail } from "@/data/user";
 import prisma from "../prisma";
-
-
 
 
 export const register = async (values: RegisterSchemaType) => {
