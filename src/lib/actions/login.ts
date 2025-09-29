@@ -24,17 +24,22 @@ export const login = async (values: LoginSchemaType) => {
             password,
             redirectTo: DEFAULT_LOGIN_REDIRECT
         })
-    return {success: "Succefully Logged In "}
+        return { success: "Succefully Logged In " }
     } catch (error) {
+        console.log(error)
         if (error instanceof AuthError) {
             switch (error.type) {
                 case "CredentialsSignin":
-
                     return { error: "invalid  credentials" }
+                case "AccessDenied":
+                    return { error: "Email is not verified" }
 
                 default:
                     return { error: "Something went wrong " }
             }
+        }
+        if (error instanceof Error) {
+            return { error: error.message };
         }
         throw error;
     }
