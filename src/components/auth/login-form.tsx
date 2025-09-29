@@ -20,6 +20,7 @@ import { useState } from "react";
 import { loginSchema } from "@/lib/schemas";
 import { LoginSchemaType } from "@/lib/schemas/validations";
 import { loginDefaultValues } from "@/lib/schemas/defaultValues";
+import { login } from "@/lib/actions/login";
 
 
 
@@ -32,15 +33,16 @@ export const LoginForm = () => {
     defaultValues: loginDefaultValues
   });
 
-  const onSubmit = (values: LoginSchemaType) => {
+  const onSubmit = async (values: LoginSchemaType) => {
     setError("");
     setSuccess("");
 
-    // ✅ Instead of real auth call → dummy simulation
-    if (values.email === "test@example.com" && values.password === "password") {
-      setSuccess("Login successful! (dummy)");
+    // ✅ Server action call
+    const res = await login(values); // Prisma logic runs server-side
+    if (res.success) {
+      setSuccess(res.success);
     } else {
-      setError("Invalid credentials (dummy)");
+      setError(res.error)
     }
   };
 
