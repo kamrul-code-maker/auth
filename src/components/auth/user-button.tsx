@@ -14,6 +14,7 @@ import {
   AvatarImage,
   AvatarFallback,
 } from "@/components/ui/avatar";
+import { logout } from "@/lib/actions/logout";
 
 export const UserButton = () => {
   // ✅ Dummy user data
@@ -23,7 +24,7 @@ export const UserButton = () => {
   };
 
   const onLogout = () => {
-    alert("Logout clicked! (dummy)");
+     logout();
   };
 
   return (
