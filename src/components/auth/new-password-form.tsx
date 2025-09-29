@@ -20,26 +20,38 @@ import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { NewPasswordSchema } from "@/lib/schemas";
 import { NewPasswordSchemaType } from "@/lib/schemas/validations";
+import { useSearchParams } from "next/navigation";
+import { newPassword } from "@/lib/actions/newPassword";
 
 
 export const NewPasswordForm = () => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
 
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token"); // Reset token from email link
+
   const form = useForm<NewPasswordSchemaType>({
     resolver: zodResolver(NewPasswordSchema),
     defaultValues: { password: "" },
   });
 
-  const onSubmit = (values: NewPasswordSchemaType) => {
+  const onSubmit = async (values: NewPasswordSchemaType) => {
     setError("");
     setSuccess("");
 
+    if (!token) {
+      setError("Invalid or missing token!");
+      return;
+    }
+
+    const res = await newPassword(values, token);
+
     // ✅ Dummy logic instead of real backend call
-    if (values.password.length >= 6) {
-      setSuccess("Password successfully reset! (dummy)");
+    if (res.success) {
+      setSuccess(res.success);
     } else {
-      setError("Password must be at least 6 characters (dummy)");
+      setError(res.error)
     }
   };
 
