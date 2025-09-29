@@ -39,7 +39,7 @@ export const sendTwoFactorTokenEmail = async (
   token: string
 ) => {
   await resend.emails.send({
-    from: 'Acme <onboarding@resend.dev>',
+    from: 'Kamrul <onboarding@resend.dev>',
     to: email,
     subject: "2FA Code",
     html: `<p>Your 2FA code: ${token}</p>`

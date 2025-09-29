@@ -5,6 +5,7 @@ import authConfig from "./auth.config"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { getUserById } from "./data/user"
 import { UserRole } from "@prisma/client"
+import { getTwoFactorConfirmationByUserId } from "./data/two-factor-confirmation"
 
 export const {
     handlers: { GET, POST }, auth, signIn, signOut
@@ -33,6 +34,19 @@ export const {
             if (!existingUser || !existingUser.emailVerified) {
                 throw new Error("Your email is not verified. Please verify your email to login.");
             }
+
+            // two factor code 
+            if (existingUser.isTwoFactorEnabled) {
+                const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id);
+
+                if (!twoFactorConfirmation) return false;
+
+                // Delete two factor confirmation for next sign in
+                await prisma.twoFactorConfirmation.delete({
+                    where: { id: twoFactorConfirmation.id }
+                });
+            }
+
             return true;
         },
         async session({ token, session }) {

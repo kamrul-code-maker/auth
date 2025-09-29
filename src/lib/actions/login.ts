@@ -9,17 +9,19 @@ import { LoginSchemaType } from "../schemas/validations"
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { AuthError } from "next-auth";
 import { getUserByEmail } from "@/data/user";
-import { generateVerficationToken } from "../tokens";
-import { sendVerificationEmail } from "../email";
+import { generateTwoFactorToken, generateVerficationToken } from "../tokens";
+import { sendTwoFactorTokenEmail, sendVerificationEmail } from "../email";
+import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
+import { getTwoFactorTokenByEmail } from "@/data/two-factor-token";
 
-export const login = async (values: LoginSchemaType) => {
+export const login = async (values: LoginSchemaType, callbackUrl?: string | null): Promise<{ error?: string; success?: string; twoFactor?: boolean }> => {
     const validatedFields = loginSchema.safeParse(values);
 
     if (!validatedFields.success) {
         return { error: "Invalid fields!" }
     }
 
-    const { email, password } = validatedFields.data;
+    const { email, password, code } = validatedFields.data;
     const existingUser = await getUserByEmail(email)
 
     if (!existingUser || !existingUser.email || !existingUser.password) {
@@ -28,7 +30,6 @@ export const login = async (values: LoginSchemaType) => {
 
 
 
-    // Todo the comments code don't want to that 
     if (!existingUser.emailVerified) {
         const verificationToken = await generateVerficationToken(existingUser.email);
 
@@ -40,12 +41,67 @@ export const login = async (values: LoginSchemaType) => {
         return { success: "Confirmation email sent!" };
     }
 
+    if (existingUser.isTwoFactorEnabled && existingUser.email) {
+        if (code) {
+            const twoFactorToken = await getTwoFactorTokenByEmail(
+                existingUser.email
+            );
+
+
+            if (!twoFactorToken) {
+                return { error: "Invalid code!" };
+            }
+
+            if (twoFactorToken.token !== code) {
+                return { error: "Invalid code!" };
+            }
+
+
+            const hasExpired = new Date(twoFactorToken.expires) < new Date();
+
+            if (hasExpired) {
+                return { error: "Code expired!" };
+            }
+
+
+            await prisma?.twoFactorToken.delete({
+                where: { id: twoFactorToken.id }
+            });
+
+            const existingConfirmation = await getTwoFactorConfirmationByUserId(
+                existingUser.id
+            );
+
+            if (existingConfirmation) {
+                await prisma?.twoFactorConfirmation.delete({
+                    where: { id: existingConfirmation.id }
+                });
+            }
+
+            await prisma?.twoFactorConfirmation.create({
+                data: {
+                    userId: existingUser.id,
+                }
+            });
+        } else {
+            const twoFactorToken = await generateTwoFactorToken(existingUser.email)
+            await sendTwoFactorTokenEmail(
+                twoFactorToken.email,
+                twoFactorToken.token,
+            );
+
+            return { twoFactor: true };
+        }
+    }
+
 
     try {
         await signIn("credentials", {
             email,
             password,
             redirect: false, // 🚀 redirect বন্ধ করলাম
+            // redirect: true, // এখানে false দিবেন যাতে আপনি নিজে redirect handle করতে পারেন
+            // redirectTo: callbackUrl || DEFAULT_LOGIN_REDIRECT,
         })
         return { success: "Succefully Logged In " }
     } catch (error) {

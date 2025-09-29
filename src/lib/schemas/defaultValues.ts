@@ -3,6 +3,7 @@
 export const loginDefaultValues = {
     email: "",
     password: "",
+    code: ""
 }
 
 export const resetDefaultValues = { email: "" }
