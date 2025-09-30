@@ -1,4 +1,5 @@
 import { UserInfo } from "@/components/auth/user-info";
+import { currentUser } from "@/lib/auth";
 
 
 // ✅ Dummy user data
@@ -10,11 +11,13 @@ const DUMMY_USER = {
   isTwoFactorEnabled: true,
 };
 
-const ServerPage = () => {
+const ServerPage =   async() => {
+    const user = await currentUser();
+  
   return (
     <UserInfo
-      label="💻 Server component (dummy)"
-      user={DUMMY_USER}
+      label="💻 Server component"
+      user={user}
     />
   );
 }
