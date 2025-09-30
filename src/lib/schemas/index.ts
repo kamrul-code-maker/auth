@@ -35,12 +35,12 @@ export enum UserRole {
   USER = "USER",
 }
 
+// ✅ Zod schema
 export const SettingsSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email"),
+  name: z.string().min(1, "Name is required").optional(),
+  email: z.string().email("Invalid email").optional(),
   password: z.string().optional(),
   newPassword: z.string().optional(),
-  role: z.nativeEnum(UserRole),
-  isTwoFactorEnabled: z.boolean(),
+  role: z.nativeEnum(UserRole).optional(),
+  isTwoFactorEnabled: z.boolean().optional(),
 });
-

@@ -4,14 +4,33 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { FormSuccess } from "@/components/form-success";
 import { RoleGate } from "@/components/auth/role-gate";
+import { toast } from "sonner"
+import { admin } from "@/lib/actions/admin";
+
 
 const AdminPage = () => {
   const onApiRouteClick = () => {
-    alert("Allowed API Route! (dummy)");
+   fetch("/api/admin")
+      .then((response) => {
+        if (response.ok) {
+          toast.success("Allowed API Route!");
+        } else {
+          toast.error("Forbidden API Route!");
+        }
+      })
   };
 
   const onServerActionClick = () => {
-    alert("Admin-only Server Action executed! (dummy)");
+     admin()
+      .then((data) => {
+        if (data.error) {
+          toast.error(data.error);
+        }
+
+        if (data.success) {
+          toast.success(data.success);
+        }
+      })
   };
 
   return (

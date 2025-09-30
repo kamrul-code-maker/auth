@@ -56,7 +56,7 @@ export const LoginForm = () => {
         setError(res.error);
       } else if (res?.success) {
         setSuccess(res.success);
-        router.push("/dashboard");
+        router.push("/settings");
       } else if (res?.twoFactor) {
         setTwoFactor(true); // show code field
       }

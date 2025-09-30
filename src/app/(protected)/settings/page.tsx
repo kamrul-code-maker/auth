@@ -19,27 +19,16 @@ import { FormSuccess } from "@/components/form-success";
 import { Formik, Form, ErrorMessage } from "formik";
 import { SettingsSchema, UserRole } from "@/lib/schemas";
 import { SettingsSchemaType } from "@/lib/schemas/validations";
+import { RoleGate } from "@/components/auth/role-gate";
+import { settings } from "@/lib/actions/settings";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 // ---------------------
 // Mocked types & data
 // ---------------------
 
 
-// Mock current user hook
-const useCurrentUser = () => ({
-  name: "John Doe",
-  email: "john.doe@example.com",
-  role: UserRole.USER,
-  isOAuth: false,
-  isTwoFactorEnabled: true,
-});
 
-// Mock settings action
-const settings = async (values: SettingsSchemaType) =>
-  new Promise<{ success?: string; error?: string }>((resolve) => {
-    console.log("Submitted values:", values);
-    setTimeout(() => resolve({ success: "Settings saved successfully!" }), 1000);
-  });
 
 // ---------------------
 // Zod schema + Formik validate function
@@ -73,16 +62,17 @@ const SettingsPage = () => {
       <CardHeader>
         <p className="text-2xl font-semibold text-center">⚙️ Settings</p>
 
+
       </CardHeader>
       <CardContent>
         <Formik
           initialValues={{
-            name: user.name,
-            email: user.email,
+            name: user?.name ?? "",
+            email: user?.email ?? "",
             password: "",
             newPassword: "",
-            role: user.role,
-            isTwoFactorEnabled: user.isTwoFactorEnabled,
+            role: user?.role as UserRole,
+            isTwoFactorEnabled: user?.isTwoFactorEnabled,
           }}
           validate={validate}
           onSubmit={(values, { setSubmitting }) => {
@@ -119,7 +109,7 @@ const SettingsPage = () => {
               </div>
 
               {/* Email */}
-              {!user.isOAuth && (
+              {!user?.isOAuth && (
                 <div className="space-y-1">
                   <label className="font-medium">Email</label>
                   <Input
@@ -136,7 +126,7 @@ const SettingsPage = () => {
               )}
 
               {/* Password / New Password */}
-              {!user.isOAuth && (
+              {!user?.isOAuth && (
                 <>
                   <div className="space-y-1">
                     <label className="font-medium">Current Password</label>
@@ -187,7 +177,7 @@ const SettingsPage = () => {
               </div>
 
               {/* Two Factor Authentication */}
-              {!user.isOAuth && (
+              {!user?.isOAuth && (
                 <div className="flex items-center justify-between border p-3 rounded-lg shadow-sm">
                   <div>
                     <label className="font-medium">Two Factor Authentication</label>
